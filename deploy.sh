@@ -7,20 +7,8 @@
 set -e
 
 DOMAIN="s4c.pacificpact.com"
-APP_DIR="/var/www/$DOMAIN"
-REPO_URL="https://github.com/YOUR_USERNAME/s4c.git"  # <-- Update this
-
-echo "==> Updating system packages..."
-apt update && apt upgrade -y
-
-echo "==> Installing Nginx, Certbot, Node.js..."
-apt install -y nginx certbot python3-certbot-nginx curl
-
-# Install Node.js 20 LTS via NodeSource
-if ! command -v node &> /dev/null; then
-  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-  apt install -y nodejs
-fi
+APP_DIR="/var/www/html/$DOMAIN"
+REPO_URL="https://github.com/pactleader/s4c.git"
 
 echo "==> Cloning repo and building..."
 rm -rf "$APP_DIR"
@@ -36,7 +24,7 @@ server {
     listen [::]:80;
     server_name s4c.pacificpact.com;
 
-    root /var/www/s4c.pacificpact.com/dist;
+    root /var/www/html/s4c.pacificpact.com/dist;
     index index.html;
 
     location / {
@@ -68,11 +56,7 @@ echo "==> Restarting Nginx..."
 systemctl restart nginx
 
 echo "==> Obtaining SSL certificate with Let's Encrypt..."
-certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m your-email@example.com
-# ^^^ Change the email above to your actual email
-
-echo "==> Setting up auto-renewal..."
-systemctl enable certbot.timer
+certbot --nginx -d $DOMAIN
 
 echo ""
 echo "====================================="
